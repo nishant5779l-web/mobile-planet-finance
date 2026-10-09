@@ -1,905 +1,709 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Mobile Planet | Finance Portal</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
 :root {
-  --bg: #080d18;
-  --card: #111a2b;
-  --blue: #2585ff;
-  --text: #f3f7ff;
-  --muted: #9eacc3;
-  --border: #26354d;
-  --red: #ff5a68;
+  --bg:#07111f;
+  --panel:#101e31;
+  --line:#263954;
+  --text:#f3f7ff;
+  --muted:#9fb0c8;
+  --blue:#3b82f6;
+  --cyan:#22d3ee;
+  --red:#fb7185;
+  --green:#34d399;
 }
-
-* {
-  box-sizing: border-box;
-}
-
+* { box-sizing:border-box; }
 body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: Arial, sans-serif;
+  margin:0;
+  background:linear-gradient(135deg,#07111f,#0c1c31 60%,#06101c);
+  color:var(--text);
+  font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
 }
-
-header {
-  padding: 20px;
-  background: #0c1424;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.logo {
-  font-size: 24px;
-  font-weight: 900;
-}
-
-.logo span {
-  color: var(--blue);
-}
-
-header small {
-  color: var(--muted);
-}
-
-.container {
-  max-width: 1100px;
-  margin: 25px auto;
-  padding: 0 16px;
-}
-
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 22px;
-  margin-bottom: 20px;
-}
-
-h2 {
-  margin-top: 0;
-  font-size: 21px;
-}
-
-.subtitle {
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 15px;
-}
-
-label {
-  display: block;
-  font-size: 13px;
-  color: #bdcbe0;
-  margin-bottom: 7px;
-}
-
-input, select, textarea {
-  width: 100%;
-  padding: 13px;
-  background: #091120;
-  color: white;
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  font-size: 15px;
-  outline: none;
-}
-
-input:focus, select:focus, textarea:focus {
-  border-color: var(--blue);
-}
-
-textarea {
-  resize: vertical;
-  min-height: 75px;
-}
-
-.field {
-  min-width: 0;
-}
-
-.full {
-  grid-column: 1 / -1;
-}
-
+button,input,select,textarea { font:inherit; }
 button {
-  background: var(--blue);
-  color: white;
-  border: none;
-  border-radius: 9px;
-  padding: 13px 17px;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
+  cursor:pointer;
+  border:0;
+  border-radius:10px;
+  padding:11px 15px;
+  font-weight:750;
+  background:linear-gradient(90deg,var(--blue),#2563eb);
+  color:white;
 }
-
-button:disabled {
-  opacity: .6;
-  cursor: wait;
+button.secondary { background:#20334c;border:1px solid var(--line); }
+button.danger { background:#7f1d35; }
+button:disabled { opacity:.5;cursor:not-allowed; }
+.wrap { max-width:1250px;margin:auto;padding:18px; }
+.top {
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;flex-wrap:wrap;margin-bottom:18px;
 }
-
-.secondary {
-  background: #202e45;
+.brand { display:flex;align-items:center;gap:12px; }
+.logo {
+  width:46px;height:46px;border-radius:14px;
+  background:linear-gradient(135deg,var(--blue),var(--cyan));
+  display:grid;place-items:center;font-weight:900;
+  color:#06101d;font-size:18px;
 }
-
-.danger {
-  background: #812c3a;
+.brand h1 { font-size:21px;margin:0; }
+.brand p { margin:2px 0 0;color:var(--muted);font-size:12px; }
+.pill {
+  display:inline-block;border:1px solid #315477;background:#102844;
+  border-radius:999px;padding:5px 10px;color:#c7e7ff;font-size:12px;
 }
-
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 18px;
+.panel {
+  background:rgba(16,30,49,.94);border:1px solid var(--line);
+  border-radius:18px;padding:18px;box-shadow:0 16px 40px #0002;
+  margin-bottom:16px;
 }
-
-#app, #dashboard {
-  display: none;
+.login { max-width:450px;margin:9vh auto; }
+.login h2,.panel h2 { margin:0 0 12px; }
+.muted { color:var(--muted); }
+.grid {
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;
 }
-
-.message {
-  padding: 12px;
-  border-radius: 8px;
-  margin: 12px 0;
-  font-size: 14px;
-  display: none;
-  overflow-wrap: anywhere;
+.field { display:flex;flex-direction:column;gap:6px;min-width:0; }
+.field label { font-size:12px;color:#c6d5e9;font-weight:700; }
+.field input,.field select,.field textarea {
+  width:100%;border:1px solid #30435d;background:#071525;color:var(--text);
+  border-radius:10px;padding:11px;outline:none;min-width:0;
 }
-
-.error {
-  background: #351b27;
-  color: #ffb6c0;
+.field input:focus,.field select:focus,.field textarea:focus {
+  border-color:var(--cyan);box-shadow:0 0 0 2px #22d3ee20;
 }
-
-.success {
-  background: #12352b;
-  color: #a4f4d1;
+.field textarea { min-height:76px;resize:vertical; }
+.section-title {
+  display:flex;align-items:center;gap:10px;margin:20px 0 12px;
+  font-weight:850;color:#dff7ff;
 }
-
-.topline {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+.section-title:after { content:"";height:1px;background:var(--line);flex:1; }
+.actions { display:flex;gap:9px;flex-wrap:wrap;margin-top:16px; }
+.notice {
+  background:#352b12;border:1px solid #80651b;color:#ffe6a3;
+  border-radius:12px;padding:12px;margin-bottom:15px;font-size:13px;
 }
-
-.badge {
-  display: inline-block;
-  background: #15345b;
-  color: #90c5ff;
-  border-radius: 20px;
-  padding: 7px 12px;
-  font-size: 12px;
-  font-weight: bold;
+.success { color:var(--green); }
+.error { color:#fda4af; }
+.stats {
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;margin-bottom:16px;
 }
-
-.search {
-  margin: 14px 0;
+.stat { background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px; }
+.stat strong { font-size:22px;display:block; }
+.stat span { color:var(--muted);font-size:12px; }
+.toolbar { display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px; }
+.toolbar input {
+  flex:1;min-width:180px;border:1px solid #30435d;background:#071525;
+  color:white;border-radius:10px;padding:11px;
 }
-
-.record {
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  padding: 15px;
-  margin-top: 12px;
-  overflow-wrap: anywhere;
+.table-wrap { overflow:auto; }
+table { width:100%;border-collapse:collapse;min-width:680px; }
+th,td { text-align:left;padding:11px;border-bottom:1px solid var(--line);font-size:13px; }
+th { color:#a9c7eb;font-size:12px; }
+td small { display:block;color:var(--muted); }
+.hidden { display:none!important; }
+.tiny { font-size:12px; }
+.footer { text-align:center;color:#7186a2;font-size:12px;padding:12px; }
+.file-note { font-size:11px;color:var(--muted); }
+@media(max-width:850px) {
+  .grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
-
-.record h3 {
-  margin: 0 0 8px;
+@media(max-width:560px) {
+  .wrap { padding:11px; }
+  .panel { padding:14px; }
+  .grid { grid-template-columns:1fr; }
+  .brand h1 { font-size:18px; }
+  .stats { gap:8px; }
+  .stat { padding:11px; }
+  .stat strong { font-size:19px; }
 }
-
-.record p {
-  margin: 6px 0;
-  color: #c1cde0;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.record-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.record-actions button {
-  padding: 9px 12px;
-}
-
-.empty {
-  color: var(--muted);
-  text-align: center;
-  padding: 25px 5px;
-}
-
-footer {
-  color: var(--muted);
-  text-align: center;
-  padding: 20px;
-  font-size: 12px;
-}
-
-@media (max-width: 600px) {
-  .grid {
-    grid-template-columns: 1fr;
+@media print {
+  body { background:#fff;color:#111; }
+  .no-print,.top,.stats,#dashboardControls { display:none!important; }
+  .print-panel {
+    display:block!important;background:white;color:#111;
+    border:0;box-shadow:none;
   }
-
-  .full {
-    grid-column: auto;
+  .print-sign {
+    display:flex;justify-content:space-between;gap:50px;margin-top:70px;
   }
-
-  .card {
-    padding: 16px;
+  .print-sign div {
+    border-top:1px solid #111;padding-top:7px;width:42%;text-align:center;
   }
-
-  .logo {
-    font-size: 21px;
-  }
+  .print-title { text-align:center; }
+  .print-title h1 { margin:0; }
+  .print-title p { margin:3px 0 18px; }
+  .print-grid { display:grid;grid-template-columns:1fr 1fr;gap:9px; }
+  .print-item { border-bottom:1px solid #ddd;padding:5px 0; }
+  .print-item b { display:block;font-size:11px;color:#555; }
+  .print-item span { font-size:13px;overflow-wrap:anywhere; }
+  .print-section { margin-top:16px;font-weight:bold;border-bottom:1px solid #888;padding-bottom:4px; }
 }
 </style>
 </head>
-
 <body>
+<div class="wrap">
 
-<header>
-  <div>
-    <div class="logo">MOBILE <span>PLANET</span></div>
-    <small>Customer Finance Management</small>
+<header class="top">
+  <div class="brand">
+    <div class="logo">MP</div>
+    <div>
+      <h1>Mobile Planet</h1>
+      <p>Phone Finance Management Portal</p>
+    </div>
   </div>
-  <span class="badge">FINANCE PORTAL</span>
+  <div class="actions no-print" style="margin:0">
+    <span id="rolePill" class="pill hidden"></span>
+    <button id="logoutBtn" class="secondary hidden" type="button">Log out</button>
+  </div>
 </header>
 
-<main class="container">
+<section id="loginView" class="panel login">
+  <h2>Welcome back</h2>
+  <p class="muted">Sign in to manage finance applications.</p>
+  <div class="field" style="margin:15px 0">
+    <label>Email</label>
+    <input id="loginEmail" type="email" autocomplete="username" placeholder="you@example.com">
+  </div>
+  <div class="field" style="margin-bottom:15px">
+    <label>Password</label>
+    <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Your password">
+  </div>
+  <button id="loginBtn" type="button" style="width:100%">Sign in securely</button>
+  <p id="loginMsg" class="tiny muted" aria-live="polite"></p>
+</section>
 
-  <!-- LOGIN -->
-  <section id="login" class="card">
-    <h2>Welcome Back 👋</h2>
-    <p class="subtitle">
-      Sign in with your registered Owner or Employee account.
-    </p>
+<main id="appView" class="hidden">
+  <div class="notice no-print">
+    <b>Privacy reminder:</b> Do not use real Aadhaar/PAN numbers or customer
+    documents until stronger data protection has been implemented. This starter
+    stores Aadhaar/PAN values as readable database text. Never put a Supabase
+    service-role key in this file.
+  </div>
 
-    <div id="loginMessage" class="message error"></div>
+  <div class="stats no-print">
+    <div class="stat"><strong id="statTotal">0</strong><span>Applications visible to you</span></div>
+    <div class="stat"><strong id="statToday">0</strong><span>Created today</span></div>
+    <div class="stat"><strong id="statMonth">0</strong><span>Created this month</span></div>
+    <div class="stat"><strong id="statValue">₹0</strong><span>Total phone price</span></div>
+  </div>
 
-    <form id="loginForm">
-      <div class="field">
-        <label for="email">Email Address</label>
-        <input id="email" type="email" autocomplete="username"
-               placeholder="Enter your registered email" required>
+  <section class="panel no-print">
+    <h2>New finance application</h2>
+    <p class="muted tiny">Fields marked * are required. Uploaded documents use private storage.</p>
+
+    <form id="applicationForm">
+      <div class="section-title">Customer details</div>
+      <div class="grid">
+        <div class="field"><label>Customer full name *</label><input name="customer_name" required maxlength="150"></div>
+        <div class="field"><label>Mobile number *</label><input name="mobile" required inputmode="tel" maxlength="20"></div>
+        <div class="field"><label>Date of birth</label><input name="date_of_birth" type="date"></div>
+        <div class="field"><label>Occupation</label><input name="occupation" maxlength="100"></div>
+        <div class="field"><label>Employer / business name</label><input name="employer_name" maxlength="150"></div>
+        <div class="field"><label>Monthly income (₹)</label><input name="monthly_income" type="number" min="0" step="0.01"></div>
+        <div class="field" style="grid-column:1/-1"><label>Full address</label><textarea name="address" maxlength="1000"></textarea></div>
+        <div class="field">
+          <label>Customer photo (JPG/PNG/PDF, max 5 MB)</label>
+          <input name="customer_photo" type="file" accept="image/jpeg,image/png,application/pdf">
+          <span class="file-note">Obtain customer consent before uploading.</span>
+        </div>
       </div>
 
-      <br>
+      <div class="section-title">Identity details</div>
+      <div class="grid">
+        <div class="field"><label>Aadhaar number</label><input name="aadhaar_number" inputmode="numeric" maxlength="12" placeholder="12 digits"></div>
+        <div class="field"><label>Aadhaar document</label><input name="aadhaar_document" type="file" accept="image/jpeg,image/png,application/pdf"></div>
+        <div class="field"><label>PAN number</label><input name="pan_number" maxlength="10" placeholder="ABCDE1234F"></div>
+        <div class="field"><label>PAN document</label><input name="pan_document" type="file" accept="image/jpeg,image/png,application/pdf"></div>
+      </div>
 
-      <div class="field">
-        <label for="password">Password</label>
-        <input id="password" type="password"
-               autocomplete="current-password"
-               placeholder="Enter password" required>
+      <div class="section-title">Phone and finance details</div>
+      <div class="grid">
+        <div class="field"><label>Phone brand *</label><input name="phone_brand" required maxlength="80" placeholder="Apple, Samsung, etc."></div>
+        <div class="field"><label>Phone model *</label><input name="phone_model" required maxlength="120"></div>
+        <div class="field"><label>IMEI 1</label><input name="imei_1" inputmode="numeric" maxlength="20"></div>
+        <div class="field"><label>IMEI 2</label><input name="imei_2" inputmode="numeric" maxlength="20"></div>
+        <div class="field"><label>Finance provider</label><input name="finance_provider" maxlength="120"></div>
+        <div class="field"><label>Phone price (₹) *</label><input name="phone_price" type="number" required min="0" step="0.01"></div>
+        <div class="field"><label>Down payment (₹)</label><input name="down_payment" type="number" min="0" step="0.01" value="0"></div>
+        <div class="field"><label>Tenure (months)</label><input name="tenure_months" type="number" min="1" max="120"></div>
+        <div class="field"><label>Monthly EMI (₹)</label><input name="monthly_emi" type="number" min="0" step="0.01"></div>
+      </div>
+
+      <div class="section-title">Reference 1</div>
+      <div class="grid">
+        <div class="field"><label>Full name</label><input name="reference_1_name" maxlength="150"></div>
+        <div class="field"><label>Mobile number</label><input name="reference_1_mobile" inputmode="tel" maxlength="20"></div>
+        <div class="field"><label>Relationship</label><input name="reference_1_relationship" maxlength="80"></div>
+      </div>
+
+      <div class="section-title">Reference 2</div>
+      <div class="grid">
+        <div class="field"><label>Full name</label><input name="reference_2_name" maxlength="150"></div>
+        <div class="field"><label>Mobile number</label><input name="reference_2_mobile" inputmode="tel" maxlength="20"></div>
+        <div class="field"><label>Relationship</label><input name="reference_2_relationship" maxlength="80"></div>
       </div>
 
       <div class="actions">
-        <button id="loginButton" type="submit">Sign In</button>
+        <button id="saveBtn" type="submit">Save application</button>
+        <button class="secondary" type="reset">Clear form</button>
       </div>
+      <p id="formMsg" class="tiny muted" aria-live="polite"></p>
     </form>
   </section>
 
-  <!-- APPLICATION -->
-  <section id="app">
-
-    <div class="card">
-      <div class="topline">
-        <div>
-          <h2 id="welcome">Dashboard</h2>
-          <p class="subtitle">Manage customer finance applications.</p>
-        </div>
-        <button id="logoutButton" class="secondary">Logout</button>
-      </div>
-      <div id="appMessage" class="message"></div>
+  <section class="panel no-print" id="dashboardControls">
+    <h2>Applications & reports</h2>
+    <div class="toolbar">
+      <input id="searchBox" placeholder="Search customer, mobile, phone, IMEI or provider…">
+      <button class="secondary" id="refreshBtn" type="button">Refresh</button>
+      <button class="secondary" id="monthCsvBtn" type="button">Export month CSV</button>
     </div>
-
-    <section id="dashboard">
-
-      <div class="card">
-        <h2>📝 New Finance Application</h2>
-        <p class="subtitle">
-          Enter the customer's details below. Required fields are marked *.
-        </p>
-
-        <form id="financeForm">
-          <div class="grid">
-
-            <div class="field">
-              <label for="customer_name">Customer Full Name *</label>
-              <input id="customer_name" maxlength="150" required>
-            </div>
-
-            <div class="field">
-              <label for="mobile">Mobile Number *</label>
-              <input id="mobile" type="tel" inputmode="tel"
-                     maxlength="20" required>
-            </div>
-
-            <div class="field">
-              <label for="date_of_birth">Date of Birth</label>
-              <input id="date_of_birth" type="date">
-            </div>
-
-            <div class="field">
-              <label for="occupation">Occupation</label>
-              <input id="occupation" maxlength="100"
-                     placeholder="Business / Job / Other">
-            </div>
-
-            <div class="field full">
-              <label for="address">Address</label>
-              <textarea id="address" maxlength="1000"></textarea>
-            </div>
-
-            <div class="field">
-              <label for="phone_model">Phone Model *</label>
-              <input id="phone_model" maxlength="150"
-                     placeholder="e.g. iPhone 16" required>
-            </div>
-
-            <div class="field">
-              <label for="finance_provider">Finance Provider</label>
-              <input id="finance_provider" maxlength="100"
-                     placeholder="Enter provider name">
-            </div>
-
-            <div class="field">
-              <label for="phone_price">Phone Price (₹) *</label>
-              <input id="phone_price" type="number"
-                     min="0.01" max="999999999"
-                     step="0.01" required>
-            </div>
-
-            <div class="field">
-              <label for="down_payment">Down Payment (₹)</label>
-              <input id="down_payment" type="number"
-                     min="0" max="999999999"
-                     step="0.01" value="0">
-            </div>
-
-            <div class="field">
-              <label for="tenure_months">Tenure (Months)</label>
-              <input id="tenure_months" type="number"
-                     min="1" max="120">
-            </div>
-
-            <div class="field">
-              <label for="monthly_emi">Monthly EMI (₹)</label>
-              <input id="monthly_emi" type="number"
-                     min="0" max="999999999"
-                     step="0.01">
-            </div>
-
-          </div>
-
-          <div class="actions">
-            <button id="saveButton" type="submit">
-              Save Application
-            </button>
-            <button type="reset" class="secondary">
-              Clear Form
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <div class="card">
-        <h2>🔍 Saved Applications</h2>
-        <p class="subtitle">
-          Search by customer name, phone number, or phone model.
-        </p>
-
-        <input id="search" class="search"
-               placeholder="Search customer applications...">
-
-        <div id="records">
-          <p class="empty">Loading applications...</p>
-        </div>
-      </div>
-
-    </section>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Customer</th><th>Phone</th><th>Finance</th><th>Created</th><th>Added by</th><th>Actions</th></tr></thead>
+        <tbody id="applicationRows"><tr><td colspan="6">Loading…</td></tr></tbody>
+      </table>
+    </div>
+    <p id="listMsg" class="tiny muted" aria-live="polite"></p>
   </section>
+
+  <section id="printPanel" class="panel print-panel hidden"></section>
 </main>
 
-<footer>
-  Mobile Planet Finance Portal · Authorized staff only
-</footer>
+<div class="footer">Mobile Planet · Finance Portal</div>
+</div>
 
 <script>
 (() => {
-  "use strict";
-
-  // Supabase project configuration
-  const SUPABASE_URL = "https://lpxwuxrudmrkxrlpsviu.supabase.co";
-
-  const SUPABASE_KEY =
-    "sb_publishable_uXlKuphyaioenlJEr0WRqA_46HTq1Rk";
+  // Use only the public/publishable key here. Never use a service-role key.
+  const SUPABASE_URL = 'https://lpxwuxrudmrkxrlpsviu.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_uXlKuphyaioenlJErQqA_46HTq1Rk';
+  const BUCKET = 'mobile-planet-private';
 
   const db = window.supabase.createClient(
     SUPABASE_URL,
-    SUPABASE_KEY
+    SUPABASE_PUBLISHABLE_KEY,
+    {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}
   );
 
   let currentUser = null;
   let currentRole = null;
-  let applications = [];
+  let records = [];
 
   const $ = id => document.getElementById(id);
 
-  function showMessage(id, text, type = "error") {
-    const box = $(id);
-    box.textContent = text;
-    box.className = "message " + type;
-    box.style.display = "block";
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+
+  const money = n => new Intl.NumberFormat('en-IN',{
+    style:'currency',currency:'INR',maximumFractionDigits:2
+  }).format(Number(n || 0));
+
+  const say = (id,message,cls='muted') => {
+    const el = $(id);
+    el.className = 'tiny ' + cls;
+    el.textContent = message;
+  };
+
+  const val = (fd,key) => {
+    const v = fd.get(key);
+    return typeof v === 'string' ? v.trim() : v;
+  };
+
+  const numOrNull = v => v === '' || v == null ? null : Number(v);
+
+  const dateText = v => v ? new Date(v).toLocaleDateString('en-IN') : '—';
+
+  async function roleForUser() {
+    const {data,error} = await db.rpc('current_staff_role');
+    if (error) throw error;
+    if (!['owner','employee'].includes(data)) {
+      throw new Error('This account has no staff role. Ask the owner to assign it in Supabase.');
+    }
+    return data;
   }
 
-  function hideMessage(id) {
-    $(id).style.display = "none";
+  async function showApp(user) {
+    currentUser = user;
+    currentRole = await roleForUser();
+    $('loginView').classList.add('hidden');
+    $('appView').classList.remove('hidden');
+    $('logoutBtn').classList.remove('hidden');
+    $('rolePill').classList.remove('hidden');
+    $('rolePill').textContent = currentRole.toUpperCase();
+    await loadApplications();
   }
 
-  function formatMoney(value) {
-    return "₹" + Number(value || 0).toLocaleString("en-IN", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+  function showLogin(message='') {
+    currentUser = null;
+    currentRole = null;
+    records = [];
+    $('appView').classList.add('hidden');
+    $('loginView').classList.remove('hidden');
+    $('logoutBtn').classList.add('hidden');
+    $('rolePill').classList.add('hidden');
+    say('loginMsg',message);
   }
 
-  function escapeHTML(value) {
-    return String(value ?? "").replace(/[&<>"']/g, ch => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
-    })[ch]);
-  }
+  async function loadApplications() {
+    $('applicationRows').innerHTML = '<tr><td colspan="6">Loading…</td></tr>';
 
-  function displayDate(value) {
-    if (!value) return "—";
-
-    const date = new Date(value + "T00:00:00");
-
-    return Number.isNaN(date.getTime())
-      ? "—"
-      : date.toLocaleDateString("en-IN");
-  }
-
-  function displayDateTime(value) {
-    if (!value) return "—";
-
-    const date = new Date(value);
-
-    return Number.isNaN(date.getTime())
-      ? "—"
-      : date.toLocaleString("en-IN");
-  }
-
-  async function checkSession() {
-    const { data, error } = await db.auth.getSession();
+    const {data,error} = await db
+      .from('finance_applications')
+      .select('*')
+      .order('created_at',{ascending:false})
+      .limit(1000);
 
     if (error) {
-      showMessage("loginMessage", error.message);
+      say('listMsg','Could not load applications: ' + error.message,'error');
+      $('applicationRows').innerHTML = '';
+      return;
+    }
+
+    records = data || [];
+    renderRows();
+    renderStats();
+  }
+
+  function renderStats() {
+    const now = new Date();
+    const start = new Date(now.getFullYear(),now.getMonth(),1);
+    const today = now.toLocaleDateString('en-CA');
+
+    $('statTotal').textContent = records.length;
+    $('statToday').textContent = records.filter(
+      r => String(r.created_at || '').slice(0,10) === today
+    ).length;
+    $('statMonth').textContent = records.filter(
+      r => new Date(r.created_at) >= start
+    ).length;
+    $('statValue').textContent = money(
+      records.reduce((s,r) => s + Number(r.phone_price || 0),0)
+    );
+  }
+
+  function renderRows() {
+    const q = $('searchBox').value.trim().toLowerCase();
+
+    const list = records.filter(r =>
+      [
+        r.customer_name,r.mobile,r.phone_brand,r.phone_model,
+        r.imei_1,r.imei_2,r.finance_provider,r.employee_name
+      ].some(v => String(v || '').toLowerCase().includes(q))
+    );
+
+    $('applicationRows').innerHTML = list.map(r => `
+      <tr>
+        <td><b>${esc(r.customer_name)}</b><small>${esc(r.mobile)}</small></td>
+        <td>${esc([r.phone_brand,r.phone_model].filter(Boolean).join(' '))}
+          <small>IMEI: ${esc(r.imei_1 || '—')}</small></td>
+        <td>${esc(r.finance_provider || '—')}
+          <small>${money(r.phone_price)} · EMI ${money(r.monthly_emi)}</small></td>
+        <td>${dateText(r.created_at)}</td>
+        <td>${esc(r.employee_name || 'Staff')}</td>
+        <td>
+          <button type="button" class="secondary" data-print="${esc(r.id)}">PDF / Print</button>
+          ${currentRole === 'owner'
+            ? `<button type="button" class="danger" data-delete="${esc(r.id)}">Delete</button>`
+            : ''}
+        </td>
+      </tr>
+    `).join('') || '<tr><td colspan="6">No matching applications.</td></tr>';
+
+    $('listMsg').textContent =
+      `Showing ${list.length} matching record(s). Employee access depends on database policies.`;
+  }
+
+  async function uploadFile(file,appId,label) {
+    if (!file || !file.size) return null;
+
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error(label + ': file must be 5 MB or smaller.');
+    }
+
+    const allowed = ['image/jpeg','image/png','application/pdf'];
+    if (!allowed.includes(file.type)) {
+      throw new Error(label + ': use JPG, PNG, or PDF.');
+    }
+
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,'_').slice(-90);
+    const path = `${currentUser.id}/${appId}/${label}_${Date.now()}_${safeName}`;
+
+    const {error} = await db.storage.from(BUCKET).upload(path,file,{
+      contentType:file.type,
+      upsert:false
+    });
+
+    if (error) throw new Error(label + ' upload failed: ' + error.message);
+    return path;
+  }
+
+  $('loginBtn').addEventListener('click',async() => {
+    $('loginBtn').disabled = true;
+    say('loginMsg','Signing in…');
+
+    try {
+      const {data,error} = await db.auth.signInWithPassword({
+        email:$('loginEmail').value.trim(),
+        password:$('loginPassword').value
+      });
+
+      if (error) throw error;
+      await showApp(data.user);
+    } catch(e) {
+      await db.auth.signOut();
+      showLogin(e.message || 'Login failed.');
+    } finally {
+      $('loginBtn').disabled = false;
+    }
+  });
+
+  $('logoutBtn').addEventListener('click',async() => {
+    await db.auth.signOut();
+    showLogin('You have been signed out.');
+  });
+
+  $('applicationForm').addEventListener('submit',async e => {
+    e.preventDefault();
+    if (!currentUser || !currentRole) return;
+
+    const btn = $('saveBtn');
+    btn.disabled = true;
+    say('formMsg','Saving application and uploading files…');
+
+    const fd = new FormData(e.currentTarget);
+
+    try {
+      const aadhaar = String(val(fd,'aadhaar_number') || '').replace(/\s/g,'');
+      const pan = String(val(fd,'pan_number') || '').toUpperCase();
+
+      if (aadhaar && !/^\d{12}$/.test(aadhaar)) {
+        throw new Error('Aadhaar number must be exactly 12 digits.');
+      }
+      if (pan && !/^[A-Z]{5}\d{4}[A-Z]$/.test(pan)) {
+        throw new Error('PAN must follow the format ABCDE1234F.');
+      }
+
+      const appId = crypto.randomUUID();
+
+      const payload = {
+        id:appId,
+        customer_name:val(fd,'customer_name'),
+        mobile:val(fd,'mobile'),
+        date_of_birth:val(fd,'date_of_birth') || null,
+        occupation:val(fd,'occupation') || null,
+        address:val(fd,'address') || null,
+        phone_brand:val(fd,'phone_brand'),
+        phone_model:val(fd,'phone_model'),
+        imei_1:val(fd,'imei_1') || null,
+        imei_2:val(fd,'imei_2') || null,
+        finance_provider:val(fd,'finance_provider') || null,
+        phone_price:numOrNull(val(fd,'phone_price')),
+        down_payment:numOrNull(val(fd,'down_payment')) ?? 0,
+        tenure_months:numOrNull(val(fd,'tenure_months')),
+        monthly_emi:numOrNull(val(fd,'monthly_emi')),
+        monthly_income:numOrNull(val(fd,'monthly_income')),
+        employer_name:val(fd,'employer_name') || null,
+
+        // These identity numbers are currently plain text in the database.
+        // Use fictional test data only until field-level protection is added.
+        aadhaar_number:aadhaar || null,
+        pan_number:pan || null,
+
+        reference_1_name:val(fd,'reference_1_name') || null,
+        reference_1_mobile:val(fd,'reference_1_mobile') || null,
+        reference_1_relationship:val(fd,'reference_1_relationship') || null,
+        reference_2_name:val(fd,'reference_2_name') || null,
+        reference_2_mobile:val(fd,'reference_2_mobile') || null,
+        reference_2_relationship:val(fd,'reference_2_relationship') || null,
+        employee_name:currentUser.email || 'Staff',
+        created_by:currentUser.id
+      };
+
+      const {error:insertError} = await db
+        .from('finance_applications')
+        .insert(payload);
+
+      if (insertError) throw insertError;
+
+      try {
+        const uploads = [
+          ['customer_photo','customer_photo_path'],
+          ['aadhaar_document','aadhaar_document_path'],
+          ['pan_document','pan_document_path']
+        ];
+
+        const paths = {};
+        for (const [field,col] of uploads) {
+          paths[col] = await uploadFile(fd.get(field),appId,field);
+        }
+
+        const hasUploads = Object.values(paths).some(Boolean);
+        if (hasUploads) {
+          const {error:updateError} = await db
+            .from('finance_applications')
+            .update(paths)
+            .eq('id',appId);
+
+          if (updateError) throw updateError;
+        }
+      } catch(uploadErr) {
+        throw new Error(
+          uploadErr.message +
+          ' The application record may already have been saved. Check the list before retrying.'
+        );
+      }
+
+      e.currentTarget.reset();
+      say('formMsg','Application saved successfully.','success');
+      await loadApplications();
+
+    } catch(err) {
+      say('formMsg',err.message || 'Unable to save application.','error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $('searchBox').addEventListener('input',renderRows);
+  $('refreshBtn').addEventListener('click',loadApplications);
+
+  $('applicationRows').addEventListener('click',async e => {
+    const printId = e.target.getAttribute('data-print');
+    const deleteId = e.target.getAttribute('data-delete');
+
+    if (printId) {
+      const row = records.find(r => r.id === printId);
+      if (row) printRecord(row);
+    }
+
+    if (deleteId && currentRole === 'owner') {
+      if (!confirm('Delete this application? This cannot be undone.')) return;
+
+      const {error} = await db
+        .from('finance_applications')
+        .delete()
+        .eq('id',deleteId);
+
+      if (error) {
+        say('listMsg','Delete failed: ' + error.message,'error');
+        return;
+      }
+
+      say('listMsg','Application deleted. Uploaded documents may need separate cleanup.','success');
+      await loadApplications();
+    }
+  });
+
+  function printRecord(r) {
+    const item = (label,value) =>
+      `<div class="print-item"><b>${esc(label)}</b><span>${esc(value || '—')}</span></div>`;
+
+    $('printPanel').innerHTML = `
+      <div class="print-title"><h1>Mobile Planet</h1><p>Phone Finance Application</p></div>
+      <p><b>Application ID:</b> ${esc(r.id)} &nbsp; <b>Date:</b> ${dateText(r.created_at)}</p>
+
+      <div class="print-section">Customer details</div>
+      <div class="print-grid">
+        ${item('Customer name',r.customer_name)}
+        ${item('Mobile',r.mobile)}
+        ${item('Date of birth',r.date_of_birth)}
+        ${item('Occupation',r.occupation)}
+        ${item('Employer',r.employer_name)}
+        ${item('Monthly income',money(r.monthly_income))}
+        ${item('Address',r.address)}
+        ${item('Added by',r.employee_name)}
+      </div>
+
+      <div class="print-section">Phone and finance details</div>
+      <div class="print-grid">
+        ${item('Phone brand',r.phone_brand)}
+        ${item('Phone model',r.phone_model)}
+        ${item('IMEI 1',r.imei_1)}
+        ${item('IMEI 2',r.imei_2)}
+        ${item('Finance provider',r.finance_provider)}
+        ${item('Phone price',money(r.phone_price))}
+        ${item('Down payment',money(r.down_payment))}
+        ${item('Tenure (months)',r.tenure_months)}
+        ${item('Monthly EMI',money(r.monthly_emi))}
+      </div>
+
+      <div class="print-section">References</div>
+      <div class="print-grid">
+        ${item('Reference 1 name',r.reference_1_name)}
+        ${item('Reference 1 mobile',r.reference_1_mobile)}
+        ${item('Reference 1 relationship',r.reference_1_relationship)}
+        ${item('Reference 2 name',r.reference_2_name)}
+        ${item('Reference 2 mobile',r.reference_2_mobile)}
+        ${item('Reference 2 relationship',r.reference_2_relationship)}
+      </div>
+
+      <p class="tiny">Identity document numbers are intentionally excluded from this printable copy.</p>
+      <div class="print-sign">
+        <div>Customer signature</div>
+        <div>Authorized staff signature</div>
+      </div>
+    `;
+
+    $('printPanel').classList.remove('hidden');
+    window.print();
+    setTimeout(() => $('printPanel').classList.add('hidden'),500);
+  }
+
+  $('monthCsvBtn').addEventListener('click',() => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(),now.getMonth(),1);
+    const list = records.filter(r => new Date(r.created_at) >= start);
+
+    const cols = [
+      'id','created_at','customer_name','mobile','phone_brand','phone_model',
+      'imei_1','imei_2','finance_provider','phone_price','down_payment',
+      'tenure_months','monthly_emi','monthly_income','employee_name'
+    ];
+
+    const csv = [
+      cols.join(','),
+      ...list.map(r => cols.map(c =>
+        '"' + String(r[c] ?? '').replace(/"/g,'""') + '"'
+      ).join(','))
+    ].join('\r\n');
+
+    const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'mobile-planet-monthly-report.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  db.auth.getSession().then(async({data,error}) => {
+    if (error) {
+      showLogin(error.message);
       return;
     }
 
     if (data.session) {
-      await openDashboard(data.session.user);
-    }
-  }
-
-  async function openDashboard(user) {
-    currentUser = user;
-
-    $("login").style.display = "none";
-    $("app").style.display = "block";
-    $("dashboard").style.display = "none";
-
-    $("welcome").textContent = "Welcome to Mobile Planet";
-
-    const { data: role, error } = await db.rpc("current_staff_role");
-
-    if (error || !["owner", "employee"].includes(role)) {
-      await db.auth.signOut();
-
-      currentUser = null;
-      currentRole = null;
-
-      $("app").style.display = "none";
-      $("login").style.display = "block";
-
-      showMessage(
-        "loginMessage",
-        "Your staff role could not be verified. Ask the owner to check your account role."
-      );
-
-      return;
-    }
-
-    currentRole = role;
-
-    $("welcome").textContent =
-      "Welcome, " + (role === "owner" ? "Owner" : "Employee");
-
-    $("dashboard").style.display = "block";
-
-    hideMessage("loginMessage");
-
-    await loadApplications();
-  }
-
-  $("loginForm").addEventListener("submit", async event => {
-    event.preventDefault();
-
-    const button = $("loginButton");
-
-    button.disabled = true;
-    button.textContent = "Signing in...";
-
-    hideMessage("loginMessage");
-
-    try {
-      const { data, error } = await db.auth.signInWithPassword({
-        email: $("email").value.trim(),
-        password: $("password").value
-      });
-
-      if (error) throw error;
-
-      await openDashboard(data.user);
-
-    } catch (error) {
-      showMessage(
-        "loginMessage",
-        error.message || "Login failed. Please try again."
-      );
-    } finally {
-      button.disabled = false;
-      button.textContent = "Sign In";
-    }
-  });
-
-  $("logoutButton").addEventListener("click", async () => {
-    const { error } = await db.auth.signOut();
-
-    if (error) {
-      showMessage("appMessage", error.message);
-      return;
-    }
-
-    currentUser = null;
-    currentRole = null;
-    applications = [];
-
-    $("app").style.display = "none";
-    $("dashboard").style.display = "none";
-    $("login").style.display = "block";
-
-    $("password").value = "";
-  });
-
-  $("financeForm").addEventListener("submit", async event => {
-    event.preventDefault();
-
-    if (!currentUser || !currentRole) return;
-
-    const price = Number($("phone_price").value);
-    const down = Number($("down_payment").value || 0);
-
-    if (!Number.isFinite(price) || price <= 0) {
-      showMessage("appMessage", "Enter a valid phone price.");
-      return;
-    }
-
-    if (!Number.isFinite(down) || down < 0 || down > price) {
-      showMessage(
-        "appMessage",
-        "Down payment must be between ₹0 and the phone price."
-      );
-      return;
-    }
-
-    const tenureValue = $("tenure_months").value;
-    const emiValue = $("monthly_emi").value;
-
-    const payload = {
-      customer_name: $("customer_name").value.trim(),
-      mobile: $("mobile").value.trim(),
-      date_of_birth: $("date_of_birth").value || null,
-      occupation: $("occupation").value.trim() || null,
-      address: $("address").value.trim() || null,
-      phone_model: $("phone_model").value.trim(),
-      finance_provider: $("finance_provider").value.trim() || null,
-      phone_price: price,
-      down_payment: down,
-      tenure_months: tenureValue ? Number(tenureValue) : null,
-      monthly_emi: emiValue ? Number(emiValue) : null,
-      created_by: currentUser.id
-    };
-
-    const button = $("saveButton");
-
-    button.disabled = true;
-    button.textContent = "Saving...";
-
-    hideMessage("appMessage");
-
-    try {
-      const { error } = await db
-        .from("finance_applications")
-        .insert(payload);
-
-      if (error) throw error;
-
-      showMessage(
-        "appMessage",
-        "Application saved successfully!",
-        "success"
-      );
-
-      $("financeForm").reset();
-
-      await loadApplications();
-
-    } catch (error) {
-      showMessage(
-        "appMessage",
-        "Could not save application: " + error.message
-      );
-    } finally {
-      button.disabled = false;
-      button.textContent = "Save Application";
-    }
-  });
-
-  async function loadApplications() {
-    $("records").innerHTML =
-      '<p class="empty">Loading applications...</p>';
-
-    try {
-      const { data, error } = await db
-        .from("finance_applications")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(500);
-
-      if (error) throw error;
-
-      applications = data || [];
-      renderApplications();
-
-    } catch (error) {
-      $("records").textContent =
-        "Unable to load applications: " + error.message;
-    }
-  }
-
-  function renderApplications() {
-    const query = $("search").value.trim().toLowerCase();
-
-    const filtered = applications.filter(item => {
-      return [
-        item.customer_name,
-        item.mobile,
-        item.phone_model,
-        item.finance_provider
-      ].some(value => String(value || "").toLowerCase().includes(query));
-    });
-
-    if (!filtered.length) {
-      $("records").innerHTML =
-        '<p class="empty">No applications found.</p>';
-      return;
-    }
-
-    $("records").innerHTML = filtered.map(item => `
-      <article class="record">
-        <h3>${escapeHTML(item.customer_name)}</h3>
-
-        <p><strong>Mobile:</strong>
-          ${escapeHTML(item.mobile)}</p>
-
-        <p><strong>Phone:</strong>
-          ${escapeHTML(item.phone_model)}</p>
-
-        <p><strong>Phone Price:</strong>
-          ${formatMoney(item.phone_price)}</p>
-
-        <p><strong>Down Payment:</strong>
-          ${formatMoney(item.down_payment)}</p>
-
-        <p><strong>Finance Provider:</strong>
-          ${escapeHTML(item.finance_provider || "—")}</p>
-
-        <p><strong>Created:</strong>
-          ${escapeHTML(displayDateTime(item.created_at))}</p>
-
-        <div class="record-actions">
-          <button type="button"
-            data-action="pdf"
-            data-id="${escapeHTML(item.id)}">
-            Print / PDF
-          </button>
-
-          ${currentRole === "owner" ? `
-            <button type="button"
-              class="danger"
-              data-action="delete"
-              data-id="${escapeHTML(item.id)}">
-              Delete
-            </button>
-          ` : ""}
-        </div>
-      </article>
-    `).join("");
-  }
-
-  $("search").addEventListener("input", renderApplications);
-
-  $("records").addEventListener("click", async event => {
-    const button = event.target.closest("button[data-action]");
-
-    if (!button) return;
-
-    const item = applications.find(
-      record => record.id === button.dataset.id
-    );
-
-    if (!item) return;
-
-    if (button.dataset.action === "pdf") {
-      printApplication(item);
-    }
-
-    if (button.dataset.action === "delete") {
-      if (currentRole !== "owner") return;
-
-      const confirmed = confirm(
-        "Permanently delete the application for " +
-        item.customer_name + "?"
-      );
-
-      if (!confirmed) return;
-
-      button.disabled = true;
-
-      const { error } = await db
-        .from("finance_applications")
-        .delete()
-        .eq("id", item.id);
-
-      if (error) {
-        alert("Delete failed: " + error.message);
-        button.disabled = false;
-        return;
+      try {
+        await showApp(data.session.user);
+      } catch(e) {
+        await db.auth.signOut();
+        showLogin(e.message);
       }
-
-      await loadApplications();
     }
   });
 
-  function printApplication(item) {
-    const popup = window.open("", "_blank");
-
-    if (!popup) {
-      alert("Allow pop-ups in your browser to print the application.");
-      return;
-    }
-
-    const fields = [
-      ["Application ID", item.id],
-      ["Application Date", displayDateTime(item.created_at)],
-      ["Customer Name", item.customer_name],
-      ["Mobile Number", item.mobile],
-      ["Date of Birth", displayDate(item.date_of_birth)],
-      ["Occupation", item.occupation || "—"],
-      ["Address", item.address || "—"],
-      ["Phone Model", item.phone_model],
-      ["Finance Provider", item.finance_provider || "—"],
-      ["Phone Price", formatMoney(item.phone_price)],
-      ["Down Payment", formatMoney(item.down_payment)],
-      ["Tenure", item.tenure_months
-        ? item.tenure_months + " months" : "—"],
-      ["Monthly EMI", item.monthly_emi == null
-        ? "—" : formatMoney(item.monthly_emi)]
-    ];
-
-    const rows = fields.map(([label, value]) => `
-      <tr>
-        <th>${escapeHTML(label)}</th>
-        <td>${escapeHTML(value)}</td>
-      </tr>
-    `).join("");
-
-    popup.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Mobile Planet - Finance Application</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            color: #172033;
-            padding: 25px;
-          }
-          h1 { margin-bottom: 5px; }
-          .subtitle { color: #555; margin-bottom: 25px; }
-          table {
-            border-collapse: collapse;
-            width: 100%;
-          }
-          th, td {
-            border: 1px solid #ccd3df;
-            padding: 11px;
-            text-align: left;
-            overflow-wrap: anywhere;
-          }
-          th { width: 38%; background: #f0f4fa; }
-          .note { margin-top: 30px; font-size: 12px; color: #555; }
-          @media print {
-            body { padding: 0; }
-          }
-        </style>
-      </head>
-      <body>
-        <h1>MOBILE PLANET</h1>
-        <div class="subtitle">Customer Finance Application</div>
-        <table>${rows}</table>
-        <div class="note">
-          Generated from the Mobile Planet Finance Portal.
-          Verify all details before using this document.
-        </div>
-        <script>
-          window.onload = function() {
-            setTimeout(function() {
-              window.print();
-            }, 300);
-          };
-        <\/script>
-      </body>
-      </html>
-    `);
-
-    popup.document.close();
-  }
-
-  db.auth.onAuthStateChange((event, session) => {
-    if (event === "SIGNED_OUT") {
-      currentUser = null;
-      currentRole = null;
-      applications = [];
-
-      $("app").style.display = "none";
-      $("dashboard").style.display = "none";
-      $("login").style.display = "block";
-    }
+  db.auth.onAuthStateChange(event => {
+    if (event === 'SIGNED_OUT') showLogin();
   });
-
-  checkSession();
 })();
 </script>
-
 </body>
 </html>
