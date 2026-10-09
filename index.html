@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mobile Planet | Finance Portal</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root {
+  --bg: #080d18;
+  --card: #111a2b;
+  --blue: #2585ff;
+  --text: #f3f7ff;
+  --muted: #9eacc3;
+  --border: #26354d;
+  --red: #ff5a68;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+}
+
+header {
+  padding: 20px;
+  background: #0c1424;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.logo span {
+  color: var(--blue);
+}
+
+header small {
+  color: var(--muted);
+}
+
+.container {
+  max-width: 1100px;
+  margin: 25px auto;
+  padding: 0 16px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px;
+  margin-bottom: 20px;
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 21px;
+}
+
+.subtitle {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  color: #bdcbe0;
+  margin-bottom: 7px;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 13px;
+  background: #091120;
+  color: white;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  font-size: 15px;
+  outline: none;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--blue);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 75px;
+}
+
+.field {
+  min-width: 0;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+button {
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 9px;
+  padding: 13px 17px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+.secondary {
+  background: #202e45;
+}
+
+.danger {
+  background: #812c3a;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+#app, #dashboard {
+  display: none;
+}
+
+.message {
+  padding: 12px;
+  border-radius: 8px;
+  margin: 12px 0;
+  font-size: 14px;
+  display: none;
+  overflow-wrap: anywhere;
+}
+
+.error {
+  background: #351b27;
+  color: #ffb6c0;
+}
+
+.success {
+  background: #12352b;
+  color: #a4f4d1;
+}
+
+.topline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-block;
+  background: #15345b;
+  color: #90c5ff;
+  border-radius: 20px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.search {
+  margin: 14px 0;
+}
+
+.record {
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 15px;
+  margin-top: 12px;
+  overflow-wrap: anywhere;
+}
+
+.record h3 {
+  margin: 0 0 8px;
+}
+
+.record p {
+  margin: 6px 0;
+  color: #c1cde0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.record-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.record-actions button {
+  padding: 9px 12px;
+}
+
+.empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 25px 5px;
+}
+
+footer {
+  color: var(--muted);
+  text-align: center;
+  padding: 20px;
+  font-size: 12px;
+}
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .full {
+    grid-column: auto;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .logo {
+    font-size: 21px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div>
+    <div class="logo">MOBILE <span>PLANET</span></div>
+    <small>Customer Finance Management</small>
+  </div>
+  <span class="badge">FINANCE PORTAL</span>
+</header>
+
+<main class="container">
+
+  <!-- LOGIN -->
+  <section id="login" class="card">
+    <h2>Welcome Back 👋</h2>
+    <p class="subtitle">
+      Sign in with your registered Owner or Employee account.
+    </p>
+
+    <div id="loginMessage" class="message error"></div>
+
+    <form id="loginForm">
+      <div class="field">
+        <label for="email">Email Address</label>
+        <input id="email" type="email" autocomplete="username"
+               placeholder="Enter your registered email" required>
+      </div>
+
+      <br>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password"
+               autocomplete="current-password"
+               placeholder="Enter password" required>
+      </div>
+
+      <div class="actions">
+        <button id="loginButton" type="submit">Sign In</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- APPLICATION -->
+  <section id="app">
+
+    <div class="card">
+      <div class="topline">
+        <div>
+          <h2 id="welcome">Dashboard</h2>
+          <p class="subtitle">Manage customer finance applications.</p>
+        </div>
+        <button id="logoutButton" class="secondary">Logout</button>
+      </div>
+      <div id="appMessage" class="message"></div>
+    </div>
+
+    <section id="dashboard">
+
+      <div class="card">
+        <h2>📝 New Finance Application</h2>
+        <p class="subtitle">
+          Enter the customer's details below. Required fields are marked *.
+        </p>
+
+        <form id="financeForm">
+          <div class="grid">
+
+            <div class="field">
+              <label for="customer_name">Customer Full Name *</label>
+              <input id="customer_name" maxlength="150" required>
+            </div>
+
+            <div class="field">
+              <label for="mobile">Mobile Number *</label>
+              <input id="mobile" type="tel" inputmode="tel"
+                     maxlength="20" required>
+            </div>
+
+            <div class="field">
+              <label for="date_of_birth">Date of Birth</label>
+              <input id="date_of_birth" type="date">
+            </div>
+
+            <div class="field">
+              <label for="occupation">Occupation</label>
+              <input id="occupation" maxlength="100"
+                     placeholder="Business / Job / Other">
+            </div>
+
+            <div class="field full">
+              <label for="address">Address</label>
+              <textarea id="address" maxlength="1000"></textarea>
+            </div>
+
+            <div class="field">
+              <label for="phone_model">Phone Model *</label>
+              <input id="phone_model" maxlength="150"
+                     placeholder="e.g. iPhone 16" required>
+            </div>
+
+            <div class="field">
+              <label for="finance_provider">Finance Provider</label>
+              <input id="finance_provider" maxlength="100"
+                     placeholder="Enter provider name">
+            </div>
+
+            <div class="field">
+              <label for="phone_price">Phone Price (₹) *</label>
+              <input id="phone_price" type="number"
+                     min="0.01" max="999999999"
+                     step="0.01" required>
+            </div>
+
+            <div class="field">
+              <label for="down_payment">Down Payment (₹)</label>
+              <input id="down_payment" type="number"
+                     min="0" max="999999999"
+                     step="0.01" value="0">
+            </div>
+
+            <div class="field">
+              <label for="tenure_months">Tenure (Months)</label>
+              <input id="tenure_months" type="number"
+                     min="1" max="120">
+            </div>
+
+            <div class="field">
+              <label for="monthly_emi">Monthly EMI (₹)</label>
+              <input id="monthly_emi" type="number"
+                     min="0" max="999999999"
+                     step="0.01">
+            </div>
+
+          </div>
+
+          <div class="actions">
+            <button id="saveButton" type="submit">
+              Save Application
+            </button>
+            <button type="reset" class="secondary">
+              Clear Form
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>🔍 Saved Applications</h2>
+        <p class="subtitle">
+          Search by customer name, phone number, or phone model.
+        </p>
+
+        <input id="search" class="search"
+               placeholder="Search customer applications...">
+
+        <div id="records">
+          <p class="empty">Loading applications...</p>
+        </div>
+      </div>
+
+    </section>
+  </section>
+</main>
+
+<footer>
+  Mobile Planet Finance Portal · Authorized staff only
+</footer>
+
+<script>
+(() => {
+  "use strict";
+
+  // Supabase project configuration
+  const SUPABASE_URL = "https://lpxwuxrudmrkxrlpsviu.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_uXlKuphyaioenlJEr0WRqA_46HTq1Rk";
+
+  const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  let currentUser = null;
+  let currentRole = null;
+  let applications = [];
+
+  const $ = id => document.getElementById(id);
+
+  function showMessage(id, text, type = "error") {
+    const box = $(id);
+    box.textContent = text;
+    box.className = "message " + type;
+    box.style.display = "block";
+  }
+
+  function hideMessage(id) {
+    $(id).style.display = "none";
+  }
+
+  function formatMoney(value) {
+    return "₹" + Number(value || 0).toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, ch => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[ch]);
+  }
+
+  function displayDate(value) {
+    if (!value) return "—";
+
+    const date = new Date(value + "T00:00:00");
+
+    return Number.isNaN(date.getTime())
+      ? "—"
+      : date.toLocaleDateString("en-IN");
+  }
+
+  function displayDateTime(value) {
+    if (!value) return "—";
+
+    const date = new Date(value);
+
+    return Number.isNaN(date.getTime())
+      ? "—"
+      : date.toLocaleString("en-IN");
+  }
+
+  async function checkSession() {
+    const { data, error } = await db.auth.getSession();
+
+    if (error) {
+      showMessage("loginMessage", error.message);
+      return;
+    }
+
+    if (data.session) {
+      await openDashboard(data.session.user);
+    }
+  }
+
+  async function openDashboard(user) {
+    currentUser = user;
+
+    $("login").style.display = "none";
+    $("app").style.display = "block";
+    $("dashboard").style.display = "none";
+
+    $("welcome").textContent = "Welcome to Mobile Planet";
+
+    const { data: role, error } = await db.rpc("current_staff_role");
+
+    if (error || !["owner", "employee"].includes(role)) {
+      await db.auth.signOut();
+
+      currentUser = null;
+      currentRole = null;
+
+      $("app").style.display = "none";
+      $("login").style.display = "block";
+
+      showMessage(
+        "loginMessage",
+        "Your staff role could not be verified. Ask the owner to check your account role."
+      );
+
+      return;
+    }
+
+    currentRole = role;
+
+    $("welcome").textContent =
+      "Welcome, " + (role === "owner" ? "Owner" : "Employee");
+
+    $("dashboard").style.display = "block";
+
+    hideMessage("loginMessage");
+
+    await loadApplications();
+  }
+
+  $("loginForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const button = $("loginButton");
+
+    button.disabled = true;
+    button.textContent = "Signing in...";
+
+    hideMessage("loginMessage");
+
+    try {
+      const { data, error } = await db.auth.signInWithPassword({
+        email: $("email").value.trim(),
+        password: $("password").value
+      });
+
+      if (error) throw error;
+
+      await openDashboard(data.user);
+
+    } catch (error) {
+      showMessage(
+        "loginMessage",
+        error.message || "Login failed. Please try again."
+      );
+    } finally {
+      button.disabled = false;
+      button.textContent = "Sign In";
+    }
+  });
+
+  $("logoutButton").addEventListener("click", async () => {
+    const { error } = await db.auth.signOut();
+
+    if (error) {
+      showMessage("appMessage", error.message);
+      return;
+    }
+
+    currentUser = null;
+    currentRole = null;
+    applications = [];
+
+    $("app").style.display = "none";
+    $("dashboard").style.display = "none";
+    $("login").style.display = "block";
+
+    $("password").value = "";
+  });
+
+  $("financeForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    if (!currentUser || !currentRole) return;
+
+    const price = Number($("phone_price").value);
+    const down = Number($("down_payment").value || 0);
+
+    if (!Number.isFinite(price) || price <= 0) {
+      showMessage("appMessage", "Enter a valid phone price.");
+      return;
+    }
+
+    if (!Number.isFinite(down) || down < 0 || down > price) {
+      showMessage(
+        "appMessage",
+        "Down payment must be between ₹0 and the phone price."
+      );
+      return;
+    }
+
+    const tenureValue = $("tenure_months").value;
+    const emiValue = $("monthly_emi").value;
+
+    const payload = {
+      customer_name: $("customer_name").value.trim(),
+      mobile: $("mobile").value.trim(),
+      date_of_birth: $("date_of_birth").value || null,
+      occupation: $("occupation").value.trim() || null,
+      address: $("address").value.trim() || null,
+      phone_model: $("phone_model").value.trim(),
+      finance_provider: $("finance_provider").value.trim() || null,
+      phone_price: price,
+      down_payment: down,
+      tenure_months: tenureValue ? Number(tenureValue) : null,
+      monthly_emi: emiValue ? Number(emiValue) : null,
+      created_by: currentUser.id
+    };
+
+    const button = $("saveButton");
+
+    button.disabled = true;
+    button.textContent = "Saving...";
+
+    hideMessage("appMessage");
+
+    try {
+      const { error } = await db
+        .from("finance_applications")
+        .insert(payload);
+
+      if (error) throw error;
+
+      showMessage(
+        "appMessage",
+        "Application saved successfully!",
+        "success"
+      );
+
+      $("financeForm").reset();
+
+      await loadApplications();
+
+    } catch (error) {
+      showMessage(
+        "appMessage",
+        "Could not save application: " + error.message
+      );
+    } finally {
+      button.disabled = false;
+      button.textContent = "Save Application";
+    }
+  });
+
+  async function loadApplications() {
+    $("records").innerHTML =
+      '<p class="empty">Loading applications...</p>';
+
+    try {
+      const { data, error } = await db
+        .from("finance_applications")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(500);
+
+      if (error) throw error;
+
+      applications = data || [];
+      renderApplications();
+
+    } catch (error) {
+      $("records").textContent =
+        "Unable to load applications: " + error.message;
+    }
+  }
+
+  function renderApplications() {
+    const query = $("search").value.trim().toLowerCase();
+
+    const filtered = applications.filter(item => {
+      return [
+        item.customer_name,
+        item.mobile,
+        item.phone_model,
+        item.finance_provider
+      ].some(value => String(value || "").toLowerCase().includes(query));
+    });
+
+    if (!filtered.length) {
+      $("records").innerHTML =
+        '<p class="empty">No applications found.</p>';
+      return;
+    }
+
+    $("records").innerHTML = filtered.map(item => `
+      <article class="record">
+        <h3>${escapeHTML(item.customer_name)}</h3>
+
+        <p><strong>Mobile:</strong>
+          ${escapeHTML(item.mobile)}</p>
+
+        <p><strong>Phone:</strong>
+          ${escapeHTML(item.phone_model)}</p>
+
+        <p><strong>Phone Price:</strong>
+          ${formatMoney(item.phone_price)}</p>
+
+        <p><strong>Down Payment:</strong>
+          ${formatMoney(item.down_payment)}</p>
+
+        <p><strong>Finance Provider:</strong>
+          ${escapeHTML(item.finance_provider || "—")}</p>
+
+        <p><strong>Created:</strong>
+          ${escapeHTML(displayDateTime(item.created_at))}</p>
+
+        <div class="record-actions">
+          <button type="button"
+            data-action="pdf"
+            data-id="${escapeHTML(item.id)}">
+            Print / PDF
+          </button>
+
+          ${currentRole === "owner" ? `
+            <button type="button"
+              class="danger"
+              data-action="delete"
+              data-id="${escapeHTML(item.id)}">
+              Delete
+            </button>
+          ` : ""}
+        </div>
+      </article>
+    `).join("");
+  }
+
+  $("search").addEventListener("input", renderApplications);
+
+  $("records").addEventListener("click", async event => {
+    const button = event.target.closest("button[data-action]");
+
+    if (!button) return;
+
+    const item = applications.find(
+      record => record.id === button.dataset.id
+    );
+
+    if (!item) return;
+
+    if (button.dataset.action === "pdf") {
+      printApplication(item);
+    }
+
+    if (button.dataset.action === "delete") {
+      if (currentRole !== "owner") return;
+
+      const confirmed = confirm(
+        "Permanently delete the application for " +
+        item.customer_name + "?"
+      );
+
+      if (!confirmed) return;
+
+      button.disabled = true;
+
+      const { error } = await db
+        .from("finance_applications")
+        .delete()
+        .eq("id", item.id);
+
+      if (error) {
+        alert("Delete failed: " + error.message);
+        button.disabled = false;
+        return;
+      }
+
+      await loadApplications();
+    }
+  });
+
+  function printApplication(item) {
+    const popup = window.open("", "_blank");
+
+    if (!popup) {
+      alert("Allow pop-ups in your browser to print the application.");
+      return;
+    }
+
+    const fields = [
+      ["Application ID", item.id],
+      ["Application Date", displayDateTime(item.created_at)],
+      ["Customer Name", item.customer_name],
+      ["Mobile Number", item.mobile],
+      ["Date of Birth", displayDate(item.date_of_birth)],
+      ["Occupation", item.occupation || "—"],
+      ["Address", item.address || "—"],
+      ["Phone Model", item.phone_model],
+      ["Finance Provider", item.finance_provider || "—"],
+      ["Phone Price", formatMoney(item.phone_price)],
+      ["Down Payment", formatMoney(item.down_payment)],
+      ["Tenure", item.tenure_months
+        ? item.tenure_months + " months" : "—"],
+      ["Monthly EMI", item.monthly_emi == null
+        ? "—" : formatMoney(item.monthly_emi)]
+    ];
+
+    const rows = fields.map(([label, value]) => `
+      <tr>
+        <th>${escapeHTML(label)}</th>
+        <td>${escapeHTML(value)}</td>
+      </tr>
+    `).join("");
+
+    popup.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Mobile Planet - Finance Application</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            color: #172033;
+            padding: 25px;
+          }
+          h1 { margin-bottom: 5px; }
+          .subtitle { color: #555; margin-bottom: 25px; }
+          table {
+            border-collapse: collapse;
+            width: 100%;
+          }
+          th, td {
+            border: 1px solid #ccd3df;
+            padding: 11px;
+            text-align: left;
+            overflow-wrap: anywhere;
+          }
+          th { width: 38%; background: #f0f4fa; }
+          .note { margin-top: 30px; font-size: 12px; color: #555; }
+          @media print {
+            body { padding: 0; }
+          }
+        </style>
+      </head>
+      <body>
+        <h1>MOBILE PLANET</h1>
+        <div class="subtitle">Customer Finance Application</div>
+        <table>${rows}</table>
+        <div class="note">
+          Generated from the Mobile Planet Finance Portal.
+          Verify all details before using this document.
+        </div>
+        <script>
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 300);
+          };
+        <\/script>
+      </body>
+      </html>
+    `);
+
+    popup.document.close();
+  }
+
+  db.auth.onAuthStateChange((event, session) => {
+    if (event === "SIGNED_OUT") {
+      currentUser = null;
+      currentRole = null;
+      applications = [];
+
+      $("app").style.display = "none";
+      $("dashboard").style.display = "none";
+      $("login").style.display = "block";
+    }
+  });
+
+  checkSession();
+})();
+</script>
+
+</body>
+</html>
